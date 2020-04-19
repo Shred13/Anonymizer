@@ -36,8 +36,8 @@ function readJSON(file) {
                 }
             }
         }
-        console.log(list_data);
-        print(temp, list_data);
+        filename = file['name'].split('.')[0];
+        print(temp, list_data, filename);
     //     var myDiv = document.getElementById("cboxes");
     //
     //     for (var i = 0; i < temp.length; i++) {
@@ -61,7 +61,7 @@ function readJSON(file) {
 
 }
 
-function print(temp, data){
+function print(temp, data, filename){
         var myDiv = document.getElementById("cboxes");
         temp.sort();
         sett = new Set(temp);
@@ -88,7 +88,7 @@ function print(temp, data){
                     checked_list.push(document.getElementById("id_checks"+i).value)
                 }
             }
-            dict_of_table = {};
+            array_of_table = [];
             for (j = 0; j<data.length; j++){
                 dict_of_val_in_table = {};
                 for (k = 0; k<data[j].length; k++){
@@ -100,11 +100,9 @@ function print(temp, data){
                     }
                     dict_of_val_in_table[k] = dict_of_few;
                 }
-                dict_of_table[j] = dict_of_val_in_table;
+                array_of_table.push(dict_of_val_in_table);
             }
-
-            console.log(dict_of_table);
-
+            download(JSON.stringify(array_of_table), "anonymized_"+filename, 'application/json')
         });
         myDiv.append(buttn);
 
@@ -121,6 +119,25 @@ function readSQL(file){
         var textFromFileLoaded = JSON.parse(JSON.stringify(fileLoadedEvent.target.result));
     };
     fileReader.readAsText(file, "UTF-8");
+}
+
+
+function download(data, filename, type) {
+    var file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+            url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
 }
 
 document.getElementById("uploadInput").addEventListener("change", handleFiles, false);
