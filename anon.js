@@ -3,18 +3,15 @@ function handleFiles() {
     let set = new Set();
     for (let i = 0; i < fileList.length; i++) {
         let val = getDataExtension(fileList[i]);
-        if (val === "json"){
-            jsonSet = (readJSON(fileList[i]));
-
-
-        }
-        else if (val === "sql") console.log("sql");
+        if (val === "json") {
+            readJSON(fileList[i]);
+        } else if (val === "sql") readSQL(fileList[i]);
         else if (val === "xml") console.log("xml");
         else console.log(val + " file not supported");
     }
 }
 
-function getDataExtension(fileName){
+function getDataExtension(fileName) {
     return fileName['name'].split('.').pop();
 }
 
@@ -38,85 +35,86 @@ function readJSON(file) {
         }
         filename = file['name'].split('.')[0];
         print(temp, list_data, filename);
-    //     var myDiv = document.getElementById("cboxes");
-    //
-    //     for (var i = 0; i < temp.length; i++) {
-    //         var checkBox = document.createElement("input");
-    //         var label = document.createElement("label");
-    //         checkBox.type = "checkbox";
-    //         checkBox.value = temp[i];
-    //         checkBox.id = "id"+i;
-    //         myDiv.appendChild(checkBox);
-    //         myDiv.appendChild(label);
-    //         label.appendChild(document.createTextNode(temp[i]));
-    //     }
-    //     var buttn = document.createElement("button");
-    //     buttn.innerHTML = "Submit";
-    //
-    //     buttn.addEventListener ("click",submit());
-    //     myDiv.append(buttn);
-    //
+        //     var myDiv = document.getElementById("cboxes");
+        //
+        //     for (var i = 0; i < temp.length; i++) {
+        //         var checkBox = document.createElement("input");
+        //         var label = document.createElement("label");
+        //         checkBox.type = "checkbox";
+        //         checkBox.value = temp[i];
+        //         checkBox.id = "id"+i;
+        //         myDiv.appendChild(checkBox);
+        //         myDiv.appendChild(label);
+        //         label.appendChild(document.createTextNode(temp[i]));
+        //     }
+        //     var buttn = document.createElement("button");
+        //     buttn.innerHTML = "Submit";
+        //
+        //     buttn.addEventListener ("click",submit());
+        //     myDiv.append(buttn);
+        //
     };
     fileReader.readAsText(file);
 
 }
 
-function print(temp, data, filename){
-        var myDiv = document.getElementById("cboxes");
-        temp.sort();
-        sett = new Set(temp);
-        temp = Array.from(sett);
+function print(temp, data, filename) {
+    var myDiv = document.getElementById("cboxes");
+    temp.sort();
+    sett = new Set(temp);
+    temp = Array.from(sett);
+    for (var i = 0; i < temp.length; i++) {
+        var checkBox = document.createElement("input");
+        var label = document.createElement("label");
+        checkBox.type = "checkbox";
+        checkBox.value = temp[i];
+        checkBox.id = "id_checks" + i;
+        myDiv.appendChild(checkBox);
+        myDiv.appendChild(label);
+        label.appendChild(document.createTextNode(temp[i]));
+        myDiv.append(document.createElement("br"))
+    }
+    var buttn = document.createElement("button");
+    buttn.innerHTML = "Submit";
+
+    buttn.addEventListener("click", function (e) {
+        e.preventDefault();
+        checked_list = [];
         for (var i = 0; i < temp.length; i++) {
-            var checkBox = document.createElement("input");
-            var label = document.createElement("label");
-            checkBox.type = "checkbox";
-            checkBox.value = temp[i];
-            checkBox.id = "id_checks"+i;
-            myDiv.appendChild(checkBox);
-            myDiv.appendChild(label);
-            label.appendChild(document.createTextNode(temp[i]));
-            myDiv.append(document.createElement("br"))
+            if (document.getElementById("id_checks" + i).checked === true) {
+                checked_list.push(document.getElementById("id_checks" + i).value)
+            }
         }
-        var buttn = document.createElement("button");
-        buttn.innerHTML = "Submit";
-
-        buttn.addEventListener ("click", function(e){
-            e.preventDefault();
-            checked_list = [];
-            for (var i = 0; i<temp.length; i++) {
-                if (document.getElementById("id_checks"+i).checked === true){
-                    checked_list.push(document.getElementById("id_checks"+i).value)
-                }
-            }
-            array_of_table = [];
-            for (j = 0; j<data.length; j++){
-                dict_of_val_in_table = {};
-                for (k = 0; k<data[j].length; k++){
-                    dict_of_few = {};
-                    for (i in checked_list){
-                        if (data[j][k][checked_list[i]]!==undefined){
-                            dict_of_few[checked_list[i]] = data[j][k][checked_list[i]]
-                        }
+        array_of_table = [];
+        for (j = 0; j < data.length; j++) {
+            dict_of_val_in_table = {};
+            for (k = 0; k < data[j].length; k++) {
+                dict_of_few = {};
+                for (i in checked_list) {
+                    if (data[j][k][checked_list[i]] !== undefined) {
+                        dict_of_few[checked_list[i]] = data[j][k][checked_list[i]]
                     }
-                    dict_of_val_in_table[k] = dict_of_few;
                 }
-                array_of_table.push(dict_of_val_in_table);
+                dict_of_val_in_table[k] = dict_of_few;
             }
-            download(JSON.stringify(array_of_table), "anonymized_"+filename, 'application/json')
-        });
-        myDiv.append(buttn);
+            array_of_table.push(dict_of_val_in_table);
+        }
+        download(JSON.stringify(array_of_table), "anonymized_" + filename, 'application/json')
+    });
+    myDiv.append(buttn);
 
 }
 
 
-function readXML(file){
+function readXML(file) {
 
 }
 
-function readSQL(file){
+function readSQL(file) {
     var fileReader = new FileReader();
-    fileReader.onload = function(fileLoadedEvent){
-        var textFromFileLoaded = JSON.parse(JSON.stringify(fileLoadedEvent.target.result));
+    fileReader.onload = function (fileLoadedEvent) {
+        var textFromFileLoaded = convert(fileLoadedEvent.target.result);
+        console.log(textFromFileLoaded);
     };
     fileReader.readAsText(file, "UTF-8");
 }
@@ -133,7 +131,7 @@ function download(data, filename, type) {
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         }, 0);
@@ -141,5 +139,3 @@ function download(data, filename, type) {
 }
 
 document.getElementById("uploadInput").addEventListener("change", handleFiles, false);
-
-
